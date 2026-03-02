@@ -17,9 +17,44 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
 //
 // Must have: return on success, throw when giving up, await delay before retry.
 
-async function fetchWithRetry(url, maxRetries = 3, delayMs = 500) {
-    // TODO
+function wait(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
+async function fetchWithRetry(url, maxRetries = 3, delayMs = 500) {
+
+
+    for(let attempt = 0; attempt <= maxRetries; attempt++){
+        try{
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Custom': 'hello',
+                }
+            });
+
+            if(response.ok){
+               
+                const data = await response.json()
+    
+                return data;
+
+            }else{
+                throw new Error(`Request failed with status: ${response.status}`)
+            }
+
+        }catch(error){
+            if(attempt === maxRetries){
+                throw error;
+            }
+
+            await wait(delayMs);
+        }
+    }
+}
+
+const data = await fetchWithRetry(`${BASE_URL}/posts`);
+console.log(data);
 
 // -----------------------------------------------------------------------------
 // DRILL 2: fetchFirstSuccess
@@ -32,9 +67,36 @@ async function fetchWithRetry(url, maxRetries = 3, delayMs = 500) {
 // After loop, throw (none succeeded).
 
 async function fetchFirstSuccess(urls) {
-    // TODO
+    let lastError;
+
+    for(const url of urls){
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Custom': 'hello'
+                }
+            });
+
+            if(response.ok){
+                const data = await response.json();
+                return data;
+            }else {
+                throw new Error(`Request failed with status: ${response.status}`);
+            }
+            
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError ?? new Error('All URls failed')
 }
 
+
+fetchFirstSuccess()
 // -----------------------------------------------------------------------------
 // DRILL 3: retryWithBackoff
 // -----------------------------------------------------------------------------
@@ -43,6 +105,58 @@ async function fetchFirstSuccess(urls) {
 //
 // Track: attempts, currentDelay. On retry, await currentDelay, then double it.
 
+
+
 async function retryWithBackoff(url, maxRetries = 3, initialDelayMs = 500) {
-    // TODO
+   let attempt = 0;
+   let currentDelay = initialDelayMs;
+
+
+   while(attempt <= maxRetries){
+    try{
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Custom': 'hello'
+            }
+        });
+
+        if(response.ok){
+            const data = await response.json();
+
+            return data;
+        }else{
+            if(attempt === maxRetries){
+                throw new Error(`Request failed with status: ${response.status}`);
+            }
+
+            attempt += 1;
+
+            
+            await wait(currentDelay);
+            
+            currentDelay *= 2;
+        }
+
+    }catch(error){
+        if(attempt === maxRetries){
+            throw error;
+        }
+
+        console.log(`Error fetching data: ${error}`);
+
+
+        attempt += 1;
+
+        
+        await wait(currentDelay);
+
+        currentDelay *= 2;
+    }
+   }
 }
+
+
+const yetAnotherPost = await retryWithBackoff(`${BASE_URL}/posts`);
+console.log(yetAnotherPost);

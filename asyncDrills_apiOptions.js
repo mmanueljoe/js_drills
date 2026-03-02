@@ -44,6 +44,9 @@ async function fetchWithTimeout(url, timeoutMs = 3000) {
     
 }
 
+const data = await fetchWithTimeout(`${BASE_URL}/posts`, 4000);
+console.log(data);
+
 // -----------------------------------------------------------------------------
 // DRILL 2: fetchWithCustomHeaders
 // -----------------------------------------------------------------------------
@@ -77,6 +80,9 @@ async function fetchWithCustomHeaders(url, extraHeaders = {}) {
     }
 }
 
+const posts = await fetchWithCustomHeaders(`${BASE_URL}/posts`);
+console.log(posts)
+
 // -----------------------------------------------------------------------------
 // DRILL 3: fetchWithTimeoutAndRetry
 // -----------------------------------------------------------------------------
@@ -106,3 +112,7 @@ async function fetchWithTimeoutAndRetry(url, timeoutMs = 2000, maxRetries = 2) {
     }
    }
 }
+
+
+const yetAnotherPost = await fetchWithTimeoutAndRetry(`${BASE_URL}/posts`);
+console.log(yetAnotherPost)
