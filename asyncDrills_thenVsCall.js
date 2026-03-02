@@ -8,6 +8,7 @@
  *       .then(fn()) — fn runs NOW, .then receives fn's return value
  */
 
+/**eslint-based rule: ignore-unusedvars */
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
 // -----------------------------------------------------------------------------
@@ -18,8 +19,21 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
 // Hint: return fetch(...) from a .then so the next .then gets the Response.
 
 function sequentialWithThen() {
-    // TODO: use .then chains only, no async/await
+    fetch(`${BASE_URL}/todos`)
+        .then(todosRes => todosRes.json())
+        .then(todos => {
+        console.log(todos)
+
+        return fetch(`${BASE_URL}/posts`);
+        })
+        .then(postsRes => postsRes.json())
+        .then(posts => 
+           console.log(posts)
+        ).catch(error => console.log(`Error fetching data: ${error}`))
 }
+
+sequentialWithThen();
+
 
 // -----------------------------------------------------------------------------
 // DRILL 2: delayThenFetch
@@ -29,8 +43,17 @@ function sequentialWithThen() {
 // Right: wrap setTimeout in a Promise, then .then(fetch) after it resolves
 
 function delayThenFetch() {
-    // TODO: returns a Promise that resolves with the parsed posts after 1s delay
+    return new Promise((resolve) => {
+        setTimeout(resolve, 1000)
+    })
+    .then(() => fetch(`${BASE_URL}/posts`))
+    .then(res => res.json())
+    .then(posts => {
+        return posts
+    }).catch(error => console.log(`Error fetching data: ${error}`))
 }
+
+delayThenFetch();
 
 // -----------------------------------------------------------------------------
 // DRILL 3: whatHappensHere
