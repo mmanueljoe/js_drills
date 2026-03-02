@@ -91,4 +91,3 @@ This is also where I come back to work on **knowledge gaps**. Any time I notice 
 - Turn some of the better patterns into reusable snippets for actual projects.
 
 For now, this repo stays intentionally simple: it’s just my space to practice JavaScript and have a clear, documented index of where things live.
-
