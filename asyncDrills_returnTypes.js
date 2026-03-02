@@ -18,26 +18,50 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
 // After implementing, call both and log typeof result. What's the difference?
 
 async function fetchRaw(url) {
-    // TODO
-    const response = await fetch(url);
-    console.log(response)
+
+    try{
+
+        const response = await fetch(url);
+
+        if(!response.ok){
+            throw new Error(`Request failed with status: ${response.status}`);
+        }
+
+        return response;
+
+    }catch(error){
+        console.log(`Error fetching data: ${error}`);
+        throw error;
+    }
+
     
 }
 
-console.log(fetchRaw(`${BASE_URL}/posts`));
+const rawRes = await fetchRaw(`${BASE_URL}/posts`)
+console.log(rawRes);
 
 
 
 async function fetchParsed(url) {
-    // TODO
-    const response = await fetch(url);
-    const parsedData = await response.json()
-    console.log(parsedData);
+    try{
+        const response = await fetch(url);
 
-    return parsedData
+        if(!response.ok){
+            throw new Error(`Request failed with status: ${response.status}`)
+        }
+        const parsedData = await response.json()
+        return parsedData
+
+    }catch(error){
+        console.log(`Error fetching data: ${error}`);
+        throw error;
+    }
+
 }
 
-console.log(fetchParsed(`${BASE_URL}/posts`));
+const parsedRes = await fetchParsed(`${BASE_URL}/posts`)
+
+console.log(parsedRes);
 // -----------------------------------------------------------------------------
 // DRILL 2: getPostAndComments
 // -----------------------------------------------------------------------------
@@ -48,8 +72,18 @@ console.log(fetchParsed(`${BASE_URL}/posts`));
 // Watch: does fetchParsed return a Response or data? Do you need .json() on it?
 
 async function getPostAndComments(postId) {
-    // TODO
+        const post = await fetchParsed(`${BASE_URL}/posts/${postId}`)
+        
+        const comments = await fetchParsed(`${BASE_URL}/comments?postId=${post.id}`);
+
+        return {post, comments};
+
+
 }
+
+const {post , comments} = await getPostAndComments(1);
+console.log(post);
+console.log(comments)
 
 // -----------------------------------------------------------------------------
 // DRILL 3: parallelThenCombine
@@ -59,5 +93,18 @@ async function getPostAndComments(postId) {
 // Return { postsCount: number, todosCount: number }
 
 async function parallelThenCombine() {
-    // TODO
+    const [posts, todos] = await Promise.all([
+        fetchParsed(`${BASE_URL}/posts`),
+        fetchParsed(`${BASE_URL}/todos`),
+    ])
+
+    return {
+        postsCount: posts.length,
+        todosCount: todos.length,
+    }
 }
+
+const {postsCount, todosCount} = await parallelThenCombine();
+console.log(postsCount)
+
+console.log(todosCount);
